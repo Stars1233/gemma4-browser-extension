@@ -1,12 +1,8 @@
 import { Message } from "@huggingface/transformers";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import {
-  BackgroundTasks,
-  REQUIRED_MODEL_IDS,
-  STORAGE_KEYS,
-} from "../../shared/types.ts";
+import { BackgroundMessages, BackgroundTasks } from "../../shared/types.ts";
 import { Button, InputText, MessageContent } from "../theme";
 import cn from "../utils/classnames.ts";
 
@@ -14,96 +10,119 @@ interface FormParams {
   input: string;
 }
 
-export default function Chat({ className = "" }: { className?: string }) {
+export default function Chat() {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const {
     control,
     formState: { errors },
     handleSubmit,
+    reset,
   } = useForm<FormParams>({
     defaultValues: {
       input: "",
     },
   });
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    chrome.runtime.sendMessage(
+      {
+        type: BackgroundTasks.AGENT_GET_MESSAGES,
+      },
+      (resp) => {
+        setMessages(resp.messages);
+      }
+    );
+
+    chrome.runtime.onMessage.addListener((message) => {
+      if (message.type === BackgroundMessages.MESSAGES_UPDATE) {
+        setMessages(message.messages);
+      }
+    });
+  }, []);
 
   const onSubmit = (data: FormParams) => {
-    const newMessages = [
-      ...messages,
-      {
-        role: "user",
-        content: data.input,
-      },
-    ];
-    setMessages(newMessages);
+    setIsLoading(true);
+    reset();
 
     chrome.runtime.sendMessage(
       {
-        type: BackgroundTasks.GENERATE_TEXT,
-        messages: [
-          { role: "system", content: "You are a helpful assistant." },
-          ...newMessages,
-        ],
+        type: BackgroundTasks.AGENT_GENERATE_TEXT,
+        prompt: data.input,
       },
-      (response) => {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: response.result },
-        ]);
+      () => {
+        setIsLoading(false);
       }
     );
   };
 
   return (
-    <div className={cn(className, "flex flex-col rounded-lg")}>
+    <div className="flex flex-col h-full">
       <div
         ref={messagesContainerRef}
-        className={cn("space-y-4 overflow-y-auto p-4")}
+        className="flex-1 overflow-y-auto px-6 py-4 space-y-4"
       >
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={cn(
-              "w-9/10 rounded-lg p-3",
-              message.role === "user"
-                ? "justify-self-end bg-blue-100 dark:bg-blue-900"
-                : "bg-gray-100 dark:bg-gray-800"
-            )}
-          >
-            <div className="mb-1 text-xs font-semibold text-gray-600 dark:text-gray-400">
-              {message.role.toUpperCase()}
-            </div>
-            <div className="text-sm text-gray-900 dark:text-gray-100">
-              <MessageContent content={message.content} />
-            </div>
+        {messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-sm text-chrome-text-secondary">
+              Start a conversation by typing a message below
+            </p>
           </div>
-        ))}
+        ) : (
+          messages
+            .filter((message) => message.role !== "system")
+            .map((message, index) => (
+              <div
+                key={index}
+                className={cn(
+                  "max-w-[85%] rounded-md px-4 py-3",
+                  message.role === "user"
+                    ? "ml-auto bg-chrome-accent-primary text-chrome-bg-primary"
+                    : "bg-chrome-bg-secondary"
+                )}
+              >
+                <div className="mb-1 text-xs font-medium opacity-70">
+                  {message.role === "user" ? "You" : "Assistant"}
+                </div>
+                <div className="text-sm">
+                  {message.role === "user" ? (
+                    message.content
+                  ) : (
+                    <MessageContent content={message.content} />
+                  )}
+                </div>
+              </div>
+            ))
+        )}
       </div>
-      <div className="mt-auto p-4">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex gap-2">
+
+      {/* Input Area */}
+      <div className="border-t border-chrome-border px-6 py-4 bg-chrome-bg-secondary">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex gap-3">
           <Controller
             name="input"
             control={control}
             rules={{ required: "Message is required" }}
             render={({ field }) => (
               <InputText
-                id="text-input"
+                {...field}
+                id="chat-input"
                 label="Message"
                 placeholder="Type your message..."
-                error={errors.input?.message as string}
-                value={field.value}
-                onChange={field.onChange}
-                className="flex-1"
+                disabled={isLoading}
+                error={errors.input?.message}
                 hideLabel
+                className="flex-1"
               />
             )}
           />
 
           <Button
             type="submit"
+            disabled={isLoading}
             color="primary"
             variant="solid"
-            //loading={processing}
           >
             Send
           </Button>

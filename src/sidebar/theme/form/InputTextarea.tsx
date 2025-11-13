@@ -32,11 +32,11 @@ const InputTextarea = forwardRef<HTMLTextAreaElement, InputTextareaProps>(
       <div className={cn("flex flex-col gap-2", className)}>
         <label
           htmlFor={id}
-          className="text-sm font-medium text-gray-100"
+          className="text-sm font-medium text-chrome-text-primary"
         >
           {label}
           {required && (
-            <span className="ml-1 text-blue-400">*</span>
+            <span className="ml-1 text-chrome-accent-primary">*</span>
           )}
         </label>
         <textarea
@@ -45,18 +45,19 @@ const InputTextarea = forwardRef<HTMLTextAreaElement, InputTextareaProps>(
           rows={rows}
           placeholder={placeholder}
           className={cn(
-            "resize-vertical w-full rounded-md border px-3 py-2 text-sm transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none",
-            "bg-gray-800 text-gray-100",
-            "focus:ring-offset-gray-900",
+            "resize-vertical w-full rounded px-4 py-2.5 text-sm transition-colors focus:ring-1 focus:outline-none",
+            "bg-chrome-bg-primary text-chrome-text-primary",
+            "focus:ring-offset-chrome-bg-primary",
             error
-              ? "border-red-700 focus:border-red-600 focus:ring-red-600"
-              : "border-gray-600 focus:border-yellow-400 focus:ring-yellow-400",
-            "placeholder:text-gray-500"
+              ? "border border-red-500 focus:border-red-500 focus:ring-red-500"
+              : "border border-chrome-border focus:border-chrome-accent-primary focus:ring-chrome-accent-primary",
+            "placeholder:text-chrome-text-disabled",
+            "disabled:opacity-50 disabled:cursor-not-allowed"
           )}
           {...props}
         />
         {error && (
-          <span className="text-sm text-red-400">
+          <span className="text-xs text-red-400">
             {error}
           </span>
         )}

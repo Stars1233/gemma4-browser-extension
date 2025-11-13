@@ -35,9 +35,9 @@ export type ButtonProps = ButtonAsButton | ButtonAsLink;
 
 const sizeClasses: Record<ButtonSize, string> = {
   xs: "px-2 py-1.5 text-xs",
-  sm: "px-3 py-1.5 text-sm",
-  md: "px-4 py-2 text-base",
-  lg: "px-6 py-3 text-lg",
+  sm: "px-3 py-2 text-sm",
+  md: "px-4 py-2.5 text-sm",
+  lg: "px-6 py-3 text-base",
 };
 
 const iconOnlySizeClasses: Record<ButtonSize, string> = {
@@ -60,35 +60,35 @@ const colorVariantClasses: Record<
 > = {
   primary: {
     solid:
-      "bg-yellow-400 text-gray-900 hover:bg-yellow-500",
+      "bg-chrome-accent-primary text-chrome-bg-primary hover:bg-chrome-accent-hover",
     outline:
-      "border-1 border-yellow-400 text-yellow-400 hover:bg-yellow-950",
+      "border border-chrome-accent-primary text-chrome-accent-primary hover:bg-chrome-hover",
     ghost:
-      "text-yellow-400 hover:bg-yellow-950",
+      "text-chrome-accent-primary hover:bg-chrome-hover",
   },
   secondary: {
     solid:
-      "bg-blue-500 text-white hover:bg-blue-600",
+      "bg-chrome-bg-tertiary text-chrome-text-primary hover:bg-chrome-hover",
     outline:
-      "border-1 border-blue-400 text-blue-400 hover:bg-blue-950",
+      "border border-chrome-border text-chrome-text-primary hover:bg-chrome-hover",
     ghost:
-      "text-blue-400 hover:bg-blue-950",
+      "text-chrome-text-primary hover:bg-chrome-hover",
   },
   mono: {
     solid:
-      "bg-white text-gray-900 hover:bg-gray-100",
+      "bg-chrome-bg-secondary text-chrome-text-primary hover:bg-chrome-bg-tertiary",
     outline:
-      "border-1 border-white text-white hover:bg-white/10",
+      "border border-chrome-border text-chrome-text-secondary hover:bg-chrome-hover",
     ghost:
-      "text-white hover:bg-white/10",
+      "text-chrome-text-secondary hover:bg-chrome-hover",
   },
   danger: {
     solid:
       "bg-red-500 text-white hover:bg-red-600",
     outline:
-      "border-1 border-red-400 text-red-400 hover:bg-red-950",
+      "border border-red-500 text-red-500 hover:bg-red-950",
     ghost:
-      "text-red-400 hover:bg-red-950",
+      "text-red-500 hover:bg-red-950",
   },
 };
 
@@ -107,7 +107,7 @@ export default function Button({
   const isIconOnly = !children && (iconLeft || iconRight || loading);
 
   const baseClasses = cn(
-    "inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900",
+    "inline-flex cursor-pointer items-center justify-center gap-2 rounded font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-chrome-accent-primary focus:ring-offset-2 focus:ring-offset-chrome-bg-primary",
     isIconOnly ? iconOnlySizeClasses[size] : sizeClasses[size],
     colorVariantClasses[color][variant],
     {

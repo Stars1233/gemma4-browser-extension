@@ -38,10 +38,10 @@ const InputCheckbox = forwardRef<HTMLInputElement, InputCheckboxProps>(
 
     return (
       <label htmlFor={id} className={cn("flex flex-col gap-2", className)}>
-        <div className="relative text-sm font-medium text-gray-100">
+        <div className="relative text-sm font-medium text-chrome-text-primary">
           {label}
           {required && (
-            <span className="ml-1 text-blue-400">*</span>
+            <span className="ml-1 text-chrome-accent-primary">*</span>
           )}
           {tooltip !== "" && (
             <LabelTooltip
@@ -57,22 +57,22 @@ const InputCheckbox = forwardRef<HTMLInputElement, InputCheckboxProps>(
             id={checkboxId}
             className={cn(
               "h-4 w-4 cursor-pointer rounded border transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none",
-              "bg-gray-800",
-              "focus:ring-offset-gray-900",
+              "bg-chrome-bg-primary",
+              "focus:ring-offset-chrome-bg-primary",
               error
-                ? "border-red-700 text-red-500 focus:border-red-600 focus:ring-red-600"
-                : "border-gray-600 text-yellow-500 focus:border-yellow-400 focus:ring-yellow-400"
+                ? "border-red-500 text-red-500 focus:border-red-500 focus:ring-red-500"
+                : "border-chrome-border text-chrome-accent-primary focus:border-chrome-accent-primary focus:ring-chrome-accent-primary"
             )}
             {...props}
           />
           {description && (
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-chrome-text-secondary">
               {description}
             </p>
           )}
         </div>
         {error && (
-          <span className="text-sm text-red-400">
+          <span className="text-xs text-red-400">
             {error}
           </span>
         )}

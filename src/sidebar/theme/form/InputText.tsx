@@ -54,13 +54,13 @@ const InputText = forwardRef<HTMLInputElement, InputTextProps>(
         <label
           htmlFor={id}
           className={cn(
-            "relative text-sm font-medium text-gray-100",
+            "relative text-sm font-medium text-chrome-text-primary",
             hideLabel &&
               "clip-[rect(0,0,0,0)] sr-only absolute m-[-1px] h-px w-px overflow-hidden border-0 p-0 whitespace-nowrap"
           )}
         >
           {label}
-          {required && <span className="ml-1 text-blue-400">*</span>}
+          {required && <span className="ml-1 text-chrome-accent-primary">*</span>}
           {tooltip !== "" && (
             <LabelTooltip
               text={<>{tooltip}</>}
@@ -77,13 +77,14 @@ const InputText = forwardRef<HTMLInputElement, InputTextProps>(
           max={max}
           step={step}
           className={cn(
-            "w-full rounded-md border px-3 py-2 text-sm transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none",
-            "bg-gray-800 text-gray-100",
-            "focus:ring-offset-gray-900",
+            "w-full rounded px-4 py-2.5 text-sm transition-colors focus:ring-1 focus:outline-none",
+            "bg-chrome-bg-primary text-chrome-text-primary",
+            "focus:ring-offset-chrome-bg-primary",
             error
-              ? "border-red-700 focus:border-red-600 focus:ring-red-600"
-              : "border-gray-600 focus:border-yellow-400 focus:ring-yellow-400",
-            "placeholder:text-gray-500"
+              ? "border border-red-500 focus:border-red-500 focus:ring-red-500"
+              : "border border-chrome-border focus:border-chrome-accent-primary focus:ring-chrome-accent-primary",
+            "placeholder:text-chrome-text-disabled",
+            "disabled:opacity-50 disabled:cursor-not-allowed"
           )}
           {...props}
         />
