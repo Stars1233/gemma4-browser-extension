@@ -6,6 +6,7 @@ import {
 import Agent from "./agent/Agent.ts";
 /*import { searchBookmarksTool } from "./tools/bookmarks.ts";
 import { searchHistoryTool } from "./tools/history.ts";*/
+import { googleSearchTool } from "./tools/search.ts";
 import {
   closeTabTool,
   createTabTool,
@@ -29,6 +30,9 @@ agent.setTool(getOpenTabsTool);
 agent.setTool(goToTabTool);
 agent.setTool(createTabTool);
 agent.setTool(closeTabTool);
+
+// Register search tools
+agent.setTool(googleSearchTool);
 
 // Register browser data tools
 // removed it for now. they dont work well
