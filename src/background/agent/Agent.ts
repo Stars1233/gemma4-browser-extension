@@ -23,46 +23,6 @@ interface Pipeline {
   model: PreTrainedModel;
 }
 
-/*const weatherTool: WebMCPTool = {
-  name: "get_weather",
-  description: "Get the weather for a given location",
-  inputSchema: {
-    type: "object",
-    properties: {
-      location: {
-        type: "string",
-        description: "The name of the location.",
-      },
-    },
-    required: ["location"],
-  },
-  execute: async ({ location }) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return location + ": sunny";
-  },
-};
-
-const transportationTool: WebMCPTool = {
-  name: "get_transport_method",
-  description: "Get the transport method based on the weather.",
-  inputSchema: {
-    type: "object",
-    properties: {
-      weather: {
-        type: "string",
-        description: "weather can be sunny or rainy",
-      },
-    },
-    required: ["weather"],
-  },
-  execute: async ({ weather }) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return weather === "sunny" ? "walk" : "drive";
-  },
-};
-
-const tools: Array<WebMCPTool> = [weatherTool, transportationTool];*/
-
 let pipeline: Pipeline = null;
 const getTextGenerationPipeline = async (
   onDownloadProgress: (id: string, percentage: number) => void = () => {}

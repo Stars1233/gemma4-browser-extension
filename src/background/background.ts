@@ -4,9 +4,15 @@ import {
   ResponseStatus,
 } from "../shared/types.ts";
 import Agent from "./agent/Agent.ts";
-import { getOpenTabsTool, goToTabTool } from "./tools/openTabs.ts";
+/*import { searchBookmarksTool } from "./tools/bookmarks.ts";
+import { searchHistoryTool } from "./tools/history.ts";*/
+import {
+  closeTabTool,
+  createTabTool,
+  getOpenTabsTool,
+  goToTabTool,
+} from "./tools/tabActions.ts";
 import FeatureExtractor from "./utils/FeatureExtractor.ts";
-
 
 const onModelDownloadProgress = (modelId: string, percentage: number) =>
   chrome.runtime.sendMessage({
@@ -18,8 +24,16 @@ const onModelDownloadProgress = (modelId: string, percentage: number) =>
 const agent = new Agent();
 const featureExtractor = new FeatureExtractor();
 
+// Register tab management tools
 agent.setTool(getOpenTabsTool);
 agent.setTool(goToTabTool);
+agent.setTool(createTabTool);
+agent.setTool(closeTabTool);
+
+// Register browser data tools
+// removed it for now. they dont work well
+// agent.setTool(searchHistoryTool);
+// agent.setTool(searchBookmarksTool);
 
 agent.onChatMessageUpdate((messages) =>
   chrome.runtime.sendMessage({

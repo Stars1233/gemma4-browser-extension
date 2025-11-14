@@ -38,10 +38,21 @@ export default function Chat() {
 
   const inputValue = watch("input");
 
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const commands: Command[] = [
     {
       name: "/clear",
-      description: "Clear all messages",
+      description: "Clear message history",
       action: () => {
         chrome.runtime.sendMessage({
           type: BackgroundTasks.AGENT_CLEAR,
@@ -53,7 +64,6 @@ export default function Chat() {
     },
   ];
 
-  // Show/hide command palette based on input
   useEffect(() => {
     if (inputValue.startsWith("/")) {
       setShowCommands(true);

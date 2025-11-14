@@ -45,10 +45,15 @@ export const validateWebMCPToolArguments = (
   args: Record<string, any>
 ): Record<string, any> => {
   const expectedArguments = tool.inputSchema.properties;
-  const validArguments = Object.entries(args).filter(
-    ([key, value]) =>
-      key in expectedArguments && expectedArguments[key].type === typeof value
-  );
+
+  const validArguments = Object.entries(args).filter(([key, value]) => {
+    const isValidKey = key in expectedArguments;
+    const expectedType = expectedArguments[key]?.type;
+    const actualType = typeof value;
+    const isValidType = expectedType === actualType;
+
+    return isValidKey && isValidType;
+  });
 
   const returnArgs: Record<string, any> = validArguments.reduce((acc, curr) => {
     return { ...acc, [curr[0]]: curr[1] };
@@ -60,7 +65,7 @@ export const validateWebMCPToolArguments = (
     );
 
     if (missingArguments.length) {
-      console.error(
+      throw new Error(
         `Missing required arguments: ${missingArguments.join(", ")}`
       );
     }
@@ -71,8 +76,21 @@ export const validateWebMCPToolArguments = (
 
 export const executeWebMCPTool = async (
   tool: WebMCPTool,
-  args: Record<string, any>
+  args: Record<string, any> | string | undefined
 ) => {
-  const validatedArgs = validateWebMCPToolArguments(tool, args);
+  // Handle case where args is a JSON string instead of an object
+  let parsedArgs: Record<string, any> = {};
+
+  if (typeof args === "string") {
+    try {
+      parsedArgs = JSON.parse(args);
+    } catch (error) {
+      parsedArgs = {};
+    }
+  } else if (args) {
+    parsedArgs = args;
+  }
+
+  const validatedArgs = validateWebMCPToolArguments(tool, parsedArgs);
   return await tool.execute(validatedArgs);
 };

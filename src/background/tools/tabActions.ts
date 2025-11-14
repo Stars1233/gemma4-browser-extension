@@ -79,3 +79,66 @@ export const goToTabTool: WebMCPTool = {
     }
   },
 };
+
+export const createTabTool: WebMCPTool = {
+  name: "create_tab",
+  description: "Create a new browser tab with the specified URL",
+  inputSchema: {
+    type: "object",
+    properties: {
+      url: {
+        type: "string",
+        description: "The URL to open in the new tab",
+      },
+      active: {
+        type: "boolean",
+        description: "Whether the new tab should become active (default: true)",
+        default: true,
+      },
+    },
+    required: ["url"],
+  },
+  execute: async (args) => {
+    const url = args.url as string;
+    const active = args.active !== undefined ? (args.active as boolean) : true;
+
+    try {
+      const tab = await chrome.tabs.create({
+        url,
+        active,
+      });
+
+      return `Successfully created new tab ${tab.id}: "${tab.title || url}" at ${tab.url}`;
+    } catch (error) {
+      return `Error creating tab: ${error.toString()}`;
+    }
+  },
+};
+
+export const closeTabTool: WebMCPTool = {
+  name: "close_tab",
+  description: "Close a specific browser tab by its ID",
+  inputSchema: {
+    type: "object",
+    properties: {
+      tabId: {
+        type: "number",
+        description: "The ID of the tab to close",
+      },
+    },
+    required: ["tabId"],
+  },
+  execute: async (args) => {
+    const tabId = args.tabId as number;
+
+    try {
+      // Get tab info before closing for better feedback
+      const tab = await chrome.tabs.get(tabId);
+      await chrome.tabs.remove(tabId);
+
+      return `Successfully closed tab ${tabId}: "${tab.title}"`;
+    } catch (error) {
+      return `Error closing tab ${tabId}: ${error.toString()}`;
+    }
+  },
+};
