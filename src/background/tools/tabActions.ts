@@ -80,9 +80,9 @@ export const goToTabTool: WebMCPTool = {
   },
 };
 
-export const createTabTool: WebMCPTool = {
-  name: "create_tab",
-  description: "Create a new browser tab with the specified URL",
+export const openUrlTool: WebMCPTool = {
+  name: "open_url",
+  description: "Open a specified URL in a new browser tab",
   inputSchema: {
     type: "object",
     properties: {

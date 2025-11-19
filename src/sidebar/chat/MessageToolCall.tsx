@@ -77,7 +77,7 @@ export default function MessageToolCall({
             <div className="text-xs text-chrome-text-secondary mb-1">
               Function:
             </div>
-            <code className="text-xs bg-chrome-bg-primary px-2 py-1 rounded block text-chrome-accent-primary font-mono">
+            <code className="text-xs bg-chrome-bg-primary px-2 py-1 rounded block text-chrome-accent-primary font-mono overflow-hidden">
               {tools[currentToolIndex].functionSignature}
             </code>
           </div>

@@ -4,16 +4,15 @@ import {
   ResponseStatus,
 } from "../shared/types.ts";
 import Agent from "./agent/Agent.ts";
-/*import { searchBookmarksTool } from "./tools/bookmarks.ts";
-import { searchHistoryTool } from "./tools/history.ts";*/
 import { googleSearchTool } from "./tools/search.ts";
 import {
   closeTabTool,
-  createTabTool,
   getOpenTabsTool,
   goToTabTool,
+  openUrlTool,
 } from "./tools/tabActions.ts";
 import FeatureExtractor from "./utils/FeatureExtractor.ts";
+import VectorHistory from "./vectorHistory/VectorHistory.ts";
 
 const onModelDownloadProgress = (modelId: string, percentage: number) =>
   chrome.runtime.sendMessage({
@@ -24,15 +23,19 @@ const onModelDownloadProgress = (modelId: string, percentage: number) =>
 
 const agent = new Agent();
 const featureExtractor = new FeatureExtractor();
+const vectorHistory = new VectorHistory(featureExtractor);
 
 // Register tab management tools
 agent.setTool(getOpenTabsTool);
 agent.setTool(goToTabTool);
-agent.setTool(createTabTool);
+agent.setTool(openUrlTool);
 agent.setTool(closeTabTool);
 
 // Register search tools
 agent.setTool(googleSearchTool);
+
+// Register vector history tools
+agent.setTool(vectorHistory.findHistoryTool);
 
 // Register browser data tools
 // removed it for now. they dont work well
@@ -111,5 +114,42 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 chrome.action.onClicked.addListener(async (tab) => {
   if (tab.id) {
     await chrome.sidePanel.open({ tabId: tab.id });
+  }
+});
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status !== "complete") return;
+  if (!tab.url?.startsWith("http")) return;
+
+  const title = tab.title || "Untitled";
+  let description = "";
+
+  try {
+    const results = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        const metaDescription = document.querySelector(
+          'meta[name="description"]'
+        );
+        return metaDescription?.getAttribute("content") || "";
+      },
+    });
+    description = results[0]?.result || "";
+  } catch (error) {
+    console.log(`Could not extract description from tab ${tabId}:`, error);
+  }
+
+  if (!description) {
+    description = tab.url || "";
+  }
+
+  // Add to vector history
+  try {
+    const entryId = await vectorHistory.addEntry(title, description, tab.url);
+    console.log(
+      `Added page to vector history: "${title}" at ${tab.url} (ID: ${entryId})`
+    );
+  } catch (error) {
+    console.error("Failed to add page to vector history:", error);
   }
 });

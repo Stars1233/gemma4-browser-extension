@@ -1,5 +1,3 @@
-console.log("AgentGemma Extension: Content script loaded");
-
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "EXTRACT_PAGE_DATA") {
     const pageText = document.body.innerText;
