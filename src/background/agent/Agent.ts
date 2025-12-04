@@ -125,7 +125,7 @@ class Agent {
       ...input,
       // @ts-expect-error
       past_key_values: this.pastKeyValues,
-      max_new_tokens: 512,
+      max_new_tokens: 1024,
       do_sample: false,
       streamer,
       return_dict_in_generate: true,

@@ -17,6 +17,12 @@ export enum BackgroundMessages {
   MESSAGES_UPDATE,
 }
 
+export enum ContentTasks {
+  EXTRACT_PAGE_DATA,
+  HIGHLIGHT_ELEMENTS,
+  CLEAR_HIGHLIGHTS,
+}
+
 export type Dtype = "fp32" | "fp16" | "q4" | "q4f16";
 
 export interface ChatMessageUser {
@@ -38,3 +44,13 @@ export interface ChatMessageAssistant {
 }
 
 export type ChatMessage = ChatMessageUser | ChatMessageAssistant;
+
+export interface WebsitePart {
+  tagName: string;
+  paragraphId: number;
+  sectionId: number;
+  id: string;
+  content: string;
+  sentences: string[];
+  embeddings?: number[][];
+}

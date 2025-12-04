@@ -4,7 +4,11 @@ import {
   ResponseStatus,
 } from "../shared/types.ts";
 import Agent from "./agent/Agent.ts";
-import { googleSearchTool } from "./tools/search.ts";
+import {
+  createAskWebsiteTool,
+  highlightWebsiteElementTool,
+} from "./tools/askWebsite.ts";
+//import { googleSearchTool } from "./tools/search.ts";
 import {
   closeTabTool,
   getOpenTabsTool,
@@ -13,6 +17,8 @@ import {
 } from "./tools/tabActions.ts";
 import FeatureExtractor from "./utils/FeatureExtractor.ts";
 import VectorHistory from "./vectorHistory/VectorHistory.ts";
+
+import Tab = chrome.tabs.Tab;
 
 const onModelDownloadProgress = (modelId: string, percentage: number) =>
   chrome.runtime.sendMessage({
@@ -32,10 +38,14 @@ agent.setTool(openUrlTool);
 agent.setTool(closeTabTool);
 
 // Register search tools
-agent.setTool(googleSearchTool);
+//agent.setTool(googleSearchTool);
 
 // Register vector history tools
 agent.setTool(vectorHistory.findHistoryTool);
+
+// Register website content tools
+agent.setTool(createAskWebsiteTool(featureExtractor));
+agent.setTool(highlightWebsiteElementTool);
 
 // Register browser data tools
 // removed it for now. they dont work well
@@ -117,10 +127,7 @@ chrome.action.onClicked.addListener(async (tab) => {
   }
 });
 
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.status !== "complete") return;
-  if (!tab.url?.startsWith("http")) return;
-
+const addCurrentPageToVectorHistory = async (tabId: number, tab: Tab) => {
   const title = tab.title || "Untitled";
   let description = "";
 
@@ -152,4 +159,12 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   } catch (error) {
     console.error("Failed to add page to vector history:", error);
   }
+};
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status !== "complete") return;
+  if (!tab.url?.startsWith("http")) return;
+
+  // Add page to vector history for later retrieval
+  addCurrentPageToVectorHistory(tabId, tab);
 });

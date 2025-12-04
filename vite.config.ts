@@ -11,6 +11,52 @@ export default defineConfig({
     react(),
     tailwindcss(),
     {
+      name: "inline-content-script",
+      closeBundle() {
+        try {
+          // Inline the types import in content.js
+          const contentPath = resolve(__dirname, "dist/content.js");
+          let content = readFileSync(contentPath, "utf-8");
+
+          // Find the import statement and extract the imported variable name
+          const importMatch = content.match(/import\{([A-Z])\s+as\s+([a-z])\}from"([^"]+)";/);
+          if (importMatch) {
+            const importedName = importMatch[1]; // e.g., "C"
+            const localName = importMatch[2]; // e.g., "a"
+            const importPath = importMatch[3];
+            const fullImportPath = resolve(__dirname, "dist", importPath);
+
+            // Read the imported file
+            const importedContent = readFileSync(fullImportPath, "utf-8");
+
+            // Find which variable is exported as importedName
+            // Format: export{S as B,T as C,A as R,G as a};
+            const exportPattern = new RegExp(`([A-Z])\\s+as\\s+${importedName}[,}]`);
+            const exportMatch = importedContent.match(exportPattern);
+
+            if (exportMatch) {
+              const actualVarName = exportMatch[1]; // e.g., "T"
+
+              // Inline the content and replace the actual variable name with local name
+              let inlinedContent = importedContent.replace(/export\{[^}]+\};?/, '');
+              // Replace both "var T=" and ",T=" patterns
+              inlinedContent = inlinedContent.replace(new RegExp(`([,\\s])${actualVarName}=`, 'g'), `$1${localName}=`);
+              // Also replace references like (T||{})
+              inlinedContent = inlinedContent.replace(new RegExp(`\\(${actualVarName}\\|\\|`, 'g'), `(${localName}||`);
+
+              // Replace the import with the inlined content
+              content = content.replace(importMatch[0], inlinedContent);
+
+              writeFileSync(contentPath, content);
+              console.log("Inlined imports in content.js");
+            }
+          }
+        } catch (e) {
+          console.error("Failed to inline content script:", e);
+        }
+      },
+    },
+    {
       name: "post-build",
       closeBundle() {
         try {
@@ -53,6 +99,13 @@ export default defineConfig({
         },
         chunkFileNames: "assets/[name]-[hash].js",
         assetFileNames: "assets/[name]-[hash].[ext]",
+        // Prevent code splitting for content script
+        manualChunks: (id) => {
+          // If the module is imported by content script, inline it
+          if (id.includes('src/content') || id.includes('src/shared')) {
+            return undefined;
+          }
+        },
       },
     },
   },
