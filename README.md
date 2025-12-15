@@ -47,7 +47,7 @@ The extension maintains a semantic search-enabled history database:
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd tfjs-agentgemma-extension
+cd functiongemma-extension
 ```
 
 2. Install dependencies:
