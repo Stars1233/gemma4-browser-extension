@@ -88,9 +88,7 @@ The extension requires these permissions:
 - `activeTab`: Access current tab content
 - `storage`: Save settings and model cache
 - `scripting`: Inject content scripts
-- `tabs`: Manage browser tabs
-- `history`: Search browsing history
-- `bookmarks`: Access bookmarks
+- `tabs`: Needed to read the tab URL
 - `host_permissions`: Access webpage content on all URLs
 
 ---
@@ -105,20 +103,16 @@ This extension demonstrates an effective architecture for integrating Transforme
 
 ### Background Script: The AI Engine
 
-The background service worker hosts the Transformers.js models and serves as the centralized AI engine.
+The background service worker hosts Transformers.js models as the centralized AI engine.
 
 **Why this works:**
 
 - **Persistent model loading**: Models are loaded once and shared across all tabs, side panels, and content scripts. This is crucial because loading multi-gigabyte models repeatedly would be impractical.
-- **Longer execution time**: Service workers can stay alive during active ML processing, which is essential for inference tasks that may take several seconds.
+- **Service worker lifetime**: Service workers can stay alive during active ML processing, which is essential for inference tasks that may take several seconds.
 - **Centralized processing**: Multiple components can send inference requests to a single background worker, enabling efficient resource sharing and coordination.
-- **Appropriate for heavy workloads**: ML inference is computationally intensive. The background context is designed to handle such workloads without blocking user interactions.
+- **Heavy workloads**: ML inference is computationally intensive. The background context is designed to handle such workloads without blocking user interactions.
 
-**What it does:**
-- Loads and manages FunctionGemma and embedding models
-- Processes inference requests from the side panel
-- Executes agent tool calls (tab management, searches, etc.)
-- Handles feature extraction for RAG
+**What it does**: Loads models, processes inference, executes tools, handles feature extraction.
 
 ### Side Panel: The User Interface
 

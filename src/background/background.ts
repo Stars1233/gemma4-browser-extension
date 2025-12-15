@@ -20,12 +20,18 @@ import VectorHistory from "./vectorHistory/VectorHistory.ts";
 
 import Tab = chrome.tabs.Tab;
 
-const onModelDownloadProgress = (modelId: string, percentage: number) =>
+let lastProgress: number = 0;
+const onModelDownloadProgress = (modelId: string, percentage: number) => {
+  const rounded = Math.round(percentage * 100) / 100;
+  if (rounded === lastProgress) return;
+  lastProgress = rounded;
+
   chrome.runtime.sendMessage({
     type: BackgroundMessages.DOWNLOAD_PROGRESS,
     modelId,
-    percentage,
+    percentage: rounded,
   });
+};
 
 const agent = new Agent();
 const featureExtractor = new FeatureExtractor();
@@ -46,11 +52,6 @@ agent.setTool(vectorHistory.findHistoryTool);
 // Register website content tools
 agent.setTool(createAskWebsiteTool(featureExtractor));
 agent.setTool(highlightWebsiteElementTool);
-
-// Register browser data tools
-// removed it for now. they dont work well
-// agent.setTool(searchHistoryTool);
-// agent.setTool(searchBookmarksTool);
 
 agent.onChatMessageUpdate((messages) =>
   chrome.runtime.sendMessage({
