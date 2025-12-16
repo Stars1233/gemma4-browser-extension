@@ -18,7 +18,6 @@ The agent can manage your browser tabs through natural language:
 - **go_to_tab**: Switch to a specific tab by ID
 - **open_url**: Open new URLs in background or foreground tabs
 - **close_tab**: Close specific tabs
-- **google_search**: Perform Google searches in new tabs
 
 #### Website Interaction (RAG)
 
@@ -31,9 +30,7 @@ The extension uses Retrieval-Augmented Generation to understand and interact wit
 
 The extension maintains a semantic search-enabled history database:
 
-- **find_history**: Search your browsing history using natural language queries instead of exact keywords. The system stores vector embeddings for page titles, descriptions, and URLs in IndexedDB, enabling semantic search with time-based filtering and relevance scoring.
-- **search_history**: Traditional keyword-based history search
-- **search_bookmarks**: Search through your bookmarks
+- **find_history**: Search your browsing history using natural language queries instead of exact keywords. The system stores vector embeddings for page titles, descriptions, and URLs in IndexedDB, enabling semantic search with time-based filtering.
 
 ### Installation
 
