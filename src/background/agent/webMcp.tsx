@@ -31,13 +31,19 @@ export interface WebMCPTool {
 export const webMCPToolToChatTemplateTool = (
   webMCPTool: WebMCPTool
 ): {
-  name: string;
-  description: string;
-  parameters: Record<string, any>;
+  type: "function";
+  function: {
+    name: string;
+    description: string;
+    parameters: Record<string, any>;
+  };
 } => ({
-  name: webMCPTool.name,
-  description: webMCPTool.description,
-  parameters: webMCPTool.inputSchema,
+  type: "function",
+  function: {
+    name: webMCPTool.name,
+    description: webMCPTool.description,
+    parameters: webMCPTool.inputSchema,
+  },
 });
 
 export const validateWebMCPToolArguments = (

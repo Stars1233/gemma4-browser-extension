@@ -1,6 +1,8 @@
 import { FeatureExtractionPipeline, pipeline } from "@huggingface/transformers";
 
-import { MODELS } from "../../shared/constants.ts";
+import { FEATURE_EXTRACTION_ID, MODELS } from "../../shared/constants.ts";
+
+const model = MODELS[FEATURE_EXTRACTION_ID];
 
 class FeatureExtractor {
   private pipeline: FeatureExtractionPipeline = null;
@@ -11,19 +13,15 @@ class FeatureExtractor {
     if (this.pipeline) return this.pipeline;
 
     try {
-      const pipe = await pipeline(
-        "feature-extraction",
-        MODELS.allMiniLM.modelId,
-        {
-          dtype: MODELS.allMiniLM.dtype,
-          device: "webgpu",
-          progress_callback: (i) => {
-            if (i.status === "progress_total") {
-              onDownloadProgress(MODELS.allMiniLM.modelId, i.progress);
-            }
-          },
-        }
-      );
+      const pipe = await pipeline("feature-extraction", model.modelId, {
+        dtype: model.dtype,
+        device: "webgpu",
+        progress_callback: (i) => {
+          if (i.status === "progress_total") {
+            onDownloadProgress(model.modelId, i.progress);
+          }
+        },
+      });
       this.pipeline = pipe as FeatureExtractionPipeline;
       return this.pipeline;
     } catch (error) {

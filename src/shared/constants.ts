@@ -1,4 +1,5 @@
-import { TaskType } from "../../../transformers.js/packages/transformers";
+import { TaskType } from "@huggingface/transformers";
+
 import { Dtype } from "./types.ts";
 
 export const MODELS: Record<
@@ -29,14 +30,24 @@ export const MODELS: Record<
     dtype: "q4f16",
     task: "text-generation",
   },
+  gemma4E2B: {
+    modelId: "onnx-community/gemma-4-E2B-it-ONNX",
+    title: "Gemma 4 E2B (q4f16)",
+    dtype: "q4f16",
+    task: "text-generation",
+  },
+  gemma4E4B: {
+    modelId: "onnx-community/gemma-4-E4B-it-ONNX",
+    title: "Gemma 4 E4B (q4f16)",
+    dtype: "q4f16",
+    task: "text-generation",
+  },
 };
+
+export const TEXT_GENERATION_ID = "gemma4E2B";
+export const FEATURE_EXTRACTION_ID = "allMiniLM";
 
 export const REQUIRED_MODEL_IDS = [
-  MODELS.allMiniLM.modelId,
-  MODELS.granite3B.modelId,
+  MODELS[FEATURE_EXTRACTION_ID].modelId,
+  MODELS[TEXT_GENERATION_ID].modelId,
 ];
-
-export const STORAGE_KEYS = {
-  IS_ACTIVE: "isActive",
-  //DOWNLOADED_MODELS: "downloadedModels",
-};

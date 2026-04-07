@@ -6,7 +6,7 @@ import {
   TextStreamer,
 } from "@huggingface/transformers";
 
-import { MODELS } from "../../shared/constants.ts";
+import { MODELS, TEXT_GENERATION_ID } from "../../shared/constants.ts";
 import {
   AgentMetrics,
   ChatMessage,
@@ -45,7 +45,7 @@ const getTextGenerationPipeline = async (
   if (pipe) return pipe;
 
   try {
-    const m = MODELS.granite3B;
+    const m = MODELS[TEXT_GENERATION_ID];
 
     const tokenizer = await AutoTokenizer.from_pretrained(m.modelId);
     const model = await AutoModelForCausalLM.from_pretrained(m.modelId, {
