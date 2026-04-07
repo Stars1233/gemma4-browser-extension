@@ -49,12 +49,12 @@ cd tfjs-agentgemma-extension
 
 2. Install dependencies:
 ```bash
-npm install
+pnpm install
 ```
 
 3. Build the extension:
 ```bash
-npm run build
+pnpm run build
 ```
 
 4. Load in Chrome:
@@ -68,7 +68,7 @@ npm run build
 For active development with automatic rebuilding:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 ### Usage
