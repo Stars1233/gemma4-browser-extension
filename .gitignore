@@ -27,4 +27,4 @@ dist-ssr
 *.sw?
 
 # Model
-public/functiongemma-270m-it-ONNX
+public/gemma-4-E2B-it-ONNX
