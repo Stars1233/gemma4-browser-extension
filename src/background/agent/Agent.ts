@@ -1,9 +1,8 @@
 import {
-  AutoModelForCausalLM,
-  AutoTokenizer,
-  PreTrainedModel,
-  PreTrainedTokenizer,
+  DynamicCache,
+  TextGenerationPipeline,
   TextStreamer,
+  pipeline,
 } from "@huggingface/transformers";
 
 import { MODELS, TEXT_GENERATION_ID } from "../../shared/constants.ts";
@@ -29,26 +28,20 @@ type Message = {
 type GenerationMetrics = AgentMetrics;
 export type AgentRunMetrics = AgentMetrics;
 
-interface Pipeline {
-  tokenizer: PreTrainedTokenizer;
-  model: PreTrainedModel;
-}
-
-let pipe: Pipeline = null;
+let pipe: TextGenerationPipeline | null = null;
 const END_OF_TEXT_TOKEN_REGEX = /<\|end_of_text\|>/g;
 const sanitizeModelText = (text: string) =>
   text.replace(END_OF_TEXT_TOKEN_REGEX, "").trim();
 
 const getTextGenerationPipeline = async (
   onDownloadProgress: (id: string, percentage: number) => void = () => {}
-): Promise<Pipeline> => {
+): Promise<TextGenerationPipeline> => {
   if (pipe) return pipe;
 
   try {
     const m = MODELS[TEXT_GENERATION_ID];
 
-    const tokenizer = await AutoTokenizer.from_pretrained(m.modelId);
-    const model = await AutoModelForCausalLM.from_pretrained(m.modelId, {
+    return await pipeline("text-generation", m.modelId, {
       dtype: m.dtype,
       device: "webgpu",
       progress_callback: (i) => {
@@ -57,17 +50,14 @@ const getTextGenerationPipeline = async (
         }
       },
     });
-
-    pipe = { tokenizer, model };
-    return pipe;
   } catch (error) {
-    console.error("Failed to initialize feature extraction pipeline:", error);
+    console.error("Failed to initialize text generation pipeline:", error);
     throw error;
   }
 };
 
 class Agent {
-  private pastKeyValues: any = null;
+  private pastKeyValues: DynamicCache | null = null;
   private messages: Array<Message> = [
     {
       role: "system",
@@ -113,6 +103,9 @@ class Agent {
     this.messages = [...this.messages, { role, content: prompt }];
     const pipe = await this.getTextGenerationPipeline();
     const conversation = [...this.messages];
+    if (!this.pastKeyValues) {
+      this.pastKeyValues = new DynamicCache();
+    }
 
     let response = "";
 
@@ -142,28 +135,35 @@ class Agent {
     }) as any;
 
     // Generate the response
-    const output: any = await pipe.model.generate({
-      ...input,
+    const output: any = await pipe(conversation, {
+      tools: this.tools.map(webMCPToolToChatTemplateTool),
+      add_generation_prompt: true,
       past_key_values: this.pastKeyValues,
       max_new_tokens: 1024,
       do_sample: false,
-      return_dict_in_generate: true,
       streamer,
     });
 
-    const { sequences, past_key_values } = output;
-    this.pastKeyValues = past_key_values;
-
     const promptLength = Number(input.input_ids.dims.at(-1) ?? 0);
-    const totalTokens = Number(sequences.dims.at(-1) ?? promptLength);
-    const generatedTokens = Math.max(0, totalTokens - promptLength);
+    const finalGeneratedText = output?.[0]?.generated_text;
 
-    response = pipe.tokenizer.batch_decode(
-      sequences.slice(null, [promptLength, null]),
-      {
-        skip_special_tokens: false,
+    if (Array.isArray(finalGeneratedText)) {
+      const lastMessage = finalGeneratedText[finalGeneratedText.length - 1];
+      if (typeof lastMessage === "string") {
+        response = lastMessage;
+      } else {
+        response = lastMessage?.content ?? response;
       }
-    )[0];
+    }
+
+    const generatedIds: any = pipe.tokenizer(response, {
+      add_special_tokens: false,
+    }).input_ids;
+    const generatedTokens = Array.isArray(generatedIds?.[0])
+      ? generatedIds[0].length
+      : Array.isArray(generatedIds)
+        ? generatedIds.length
+        : 0;
 
     response = sanitizeModelText(response);
 
@@ -336,6 +336,7 @@ class Agent {
 
   public clear() {
     this.messages = [];
+    void this.pastKeyValues?.dispose();
     this.pastKeyValues = null;
     this.chatMessages = [];
   }

@@ -1,12 +1,12 @@
-// sort-imports-ignore
-import "./utils/XMLHttpRequestPolyfill.ts";
+import { ModelRegistry } from "@huggingface/transformers";
 
+import { MODELS, REQUIRED_MODEL_IDS } from "../shared/constants.ts";
+import { AvailableTools } from "../shared/tools.ts";
 import {
   BackgroundMessages,
   BackgroundTasks,
   ResponseStatus,
 } from "../shared/types.ts";
-import { AvailableTools } from "../shared/tools.ts";
 import Agent from "./agent/Agent.ts";
 import {
   createAskWebsiteTool,
@@ -23,8 +23,6 @@ import FeatureExtractor from "./utils/FeatureExtractor.ts";
 import VectorHistory from "./vectorHistory/VectorHistory.ts";
 
 import Tab = chrome.tabs.Tab;
-import { MODELS, REQUIRED_MODEL_IDS } from "../shared/constants.ts";
-import { ModelRegistry } from "@huggingface/transformers";
 
 let lastProgress: number = 0;
 const onModelDownloadProgress = (modelId: string, percentage: number) => {
